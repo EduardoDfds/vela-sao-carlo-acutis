@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vela para São Carlo Acutis</title>
+  <meta name="description" content="Acenda uma vela virtual para São Carlo Acutis. Contador local e temporizador simples. Pronto para GitHub Pages." />
+  <meta name="theme-color" content="#111827" />
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#111827;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --gold:#fbbf24;
+      --accent:#f59e0b;
+      --btn:#1f2937;
+      --btn-hover:#374151;
+      --ring:#f59e0b55;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: var(--bg);
+      color:var(--text);
+      display:grid; place-items:center;
+      position:relative;
+      overflow:hidden;
+    }
+    /* Imagem de fundo suave */
+    body::before{
+      content:"";
+      position:absolute; inset:0;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/1/1c/Carlo_Acutis.jpg') center/cover no-repeat;
+      filter: brightness(0.35) blur(4px);
+      z-index:-2;
+    }
+    body::after{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(circle at center, rgba(17,24,39,0.4) 0%, rgba(11,16,32,0.95) 80%);
+      z-index:-1;
+    }
+
+    .wrap{
+      width:min(680px, 92vw);
+      background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:22px;
+      padding:28px 22px 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.45);
+      backdrop-filter: blur(6px);
+    }
+    header{ text-align:center; margin-bottom:8px; }
+    h1{
+      margin:0;
+      font-size:clamp(1.35rem, 1.1rem + 1.2vw, 2rem);
+      letter-spacing:.2px;
+    }
+    .subtitle{ color:var(--muted); font-size:.95rem; margin-top:6px; }
+
+    .candle-area{
+      display:grid; place-items:center; margin:18px 0 10px;
+    }
+    .candle{
+      width:min(220px, 60vw);
+      aspect-ratio: 3/5;
+      display:grid; place-items:center;
+      position:relative;
+      filter: drop-shadow(0 12px 22px rgba(245, 158, 11, .15));
+    }
+    .svgbox{ width:100%; height:auto; }
+    .glow{ position:absolute; top:6%; left:50%; transform:translateX(-50%);
+      width:70%; aspect-ratio:1/1; border-radius:50%; pointer-events:none;
+      background: radial-gradient(closest-side, rgba(251,191,36,.55), rgba(251,191,36,0));
+      opacity:0; transition:opacity .6s ease;
+      filter: blur(10px);
+    }
+    .lit .glow{ opacity:1; }
+
+    .controls{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:14px 0 2px; }
+    button{
+      background:var(--btn); color:var(--text); border:1px solid rgba(255,255,255,.08);
+      padding:10px 14px; border-radius:999px; font-size:1rem; cursor:pointer;
+      transition: transform .02s ease, background .15s ease, box-shadow .15s ease;
+    }
+    button:hover{ background:var(--btn-hover); }
+    button:active{ transform: translateY(1px); }
+    button.primary{ border-color: transparent; background: linear-gradient(180deg, var(--accent), var(--gold)); color:#111; font-weight:600; }
+    button.primary:hover{ filter:brightness(.98); box-shadow:0 0 0 6px var(--ring); }
+
+    .stats{
+      display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin:12px 0 10px;
+      color:var(--muted); font-size:.95rem;
+    }
+    .chip{
+      border:1px dashed rgba(255,255,255,.18); padding:8px 12px; border-radius:999px;
+    }
+
+    .prayer{ margin-top:10px; }
+    details{
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:16px; padding:12px 14px;
+    }
+    summary{ cursor:pointer; font-weight:600; }
+    .prayer p{ margin:.6rem 0; line-height:1.6; }
+
+    footer{ text-align:center; margin-top:18px; color:var(--muted); font-size:.85rem; }
+    a{ color:var(--gold); text-decoration:none; }
+
+    @media (prefers-reduced-motion:no-preference){
+      .flame{ transform-origin:50% 95%; animation: flicker 1.2s infinite ease-in-out; }
+      @keyframes flicker{
+        0%{ transform: scaleY(1) translateX(0); opacity:.95; }
+        35%{ transform: scaleY(1.04) translateX(-.6px); opacity:1; }
+        70%{ transform: scaleY(.98) translateX(.6px); opacity:.92; }
+        100%{ transform: scaleY(1) translateX(0); opacity:.97; }
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <h1>Vela para São Carlo Acutis</h1>
+      <div class="subtitle">Clique para acender sua vela virtual por 1 minuto e fazer uma breve oração.</div>
+    </header>
+
+    <section class="candle-area">
+      <div id="candle" class="candle" aria-live="polite">
+        <div class="glow" aria-hidden="true"></div>
+        <!-- SVG Candle -->
+        <svg class="svgbox" viewBox="0 0 200 320" role="img" aria-label="Vela devocional">
+          <ellipse cx="100" cy="300" rx="70" ry="10" fill="#2b2f42" />
+          <rect x="70" y="110" width="60" height="170" rx="10" fill="#f3f4f6" />
+          <path d="M85 145 q6 10 0 20 M115 165 q8 10 0 18" stroke="#e5e7eb" stroke-width="6" stroke-linecap="round" />
+          <rect x="97" y="95" width="6" height="20" rx="2" fill="#111827"/>
+          <g id="flame" class="flame" style="opacity:0">
+            <path d="M100 70 C 85 92, 90 110, 100 120 C 110 110, 115 92, 100 70 Z" fill="url(#gradFlame)" />
+            <circle cx="100" cy="118" r="10" fill="#fde68a" opacity="0.6" />
+          </g>
+          <defs>
+            <radialGradient id="gradFlame" cx="50%" cy="40%" r="60%">
+              <stop offset="0%" stop-color="#fff7ed"/>
+              <stop offset="40%" stop-color="#fde68a"/>
+              <stop offset="80%" stop-color="#f59e0b"/>
+              <stop offset="100%" stop-color="#ef4444"/>
+            </radialGradient>
+          </defs>
+        </svg>
+      </div>
+
+      <div class="controls">
+        <button id="toggleBtn" class="primary" aria-pressed="false">Acender vela (1 min)</button>
+        <button id="resetCount" title="Zerar apenas o contador (não apaga a vela)">Zerar contador</button>
+      </div>
+
+      <div class="stats">
+        <span class="chip">Velas acesas por você: <strong id="count">0</strong></span>
+        <span class="chip">Tempo restante: <strong id="time">--:--</strong></span>
+        <span class="chip">Estado: <strong id="state">apagada</strong></span>
+      </div>
+    </section>
+
+    <section class="prayer">
+      <details>
+        <summary>Oração breve a São Carlo Acutis</summary>
+        <p>
+          São Carlo Acutis, jovem amigo de Jesus, que transformaste a internet em caminho de luz,
+          intercede por mim e por todos os que aqui rezam. Que eu busque a Eucaristia com amor,
+          viva a caridade com alegria e use os dons que recebi para o bem. Amém.
+        </p>
+      </details>
+    </section>
+
+    <footer>
+      Feito com carinho. Este site guarda apenas dados locais no seu navegador (sem servidor).
+    </footer>
+  </main>
+
+  <script>
+    (function(){
+      const flame = document.getElementById('flame');
+      const candle = document.getElementById('candle');
+      const toggleBtn = document.getElementById('toggleBtn');
+      const resetCount = document.getElementById('resetCount');
+      const elCount = document.getElementById('count');
+      const elTime = document.getElementById('time');
+      const elState = document.getElementById('state');
+
+      const LS_KEYS = {
+        COUNT: 'contadorVelasAcutis',
+        LIT: 'velaAcutis_lit',
+        UNTIL: 'velaAcutis_until'
+      };
+
+      const getCount = () => parseInt(localStorage.getItem(LS_KEYS.COUNT) || '0', 10);
+      const setCount = (v) => localStorage.setItem(LS_KEYS.COUNT, String(v));
+
+      function setLitState(isLit){
+        flame.style.opacity = isLit ? 1 : 0;
+        candle.classList.toggle('lit', isLit);
+        toggleBtn.textContent = isLit ? 'Apagar vela' : 'Acender vela (1 min)';
+        toggleBtn.setAttribute('aria-pressed', isLit ? 'true' : 'false');
+        elState.textContent = isLit ? 'acesa' : 'apagada';
+      }
+
+      function startTimer(ms){
+        const until = Date.now() + ms;
+        localStorage.setItem(LS_KEYS.UNTIL, String(until));
+        setLitState(true);
+        tick();
+      }
+
+      function clearTimer(){
+        localStorage.removeItem(LS_KEYS.UNTIL);
+        setLitState(false);
+        elTime.textContent = '--:--';
+      }
+
+      function formatTime(ms){
+        const total = Math.max(0, Math.floor(ms / 1000));
+        const m = Math.floor(total / 60).toString().padStart(2,'0');
+        const s = Math.floor(total % 60).toString().padStart(2,'0');
+        return `${m}:${s}`;
+      }
+
+      function tick(){
+        const until = parseInt(localStorage.getItem(LS_KEYS.UNTIL) || '0', 10);
+        if(!until){ elTime.textContent = '--:--'; return; }
+        const left = until - Date.now();
+        if(left <= 0){ clearTimer(); return; }
+        setLitState(true);
+        elTime.textContent = formatTime(left);
+      }
+
+      setInterval(tick, 500);
+
+      toggleBtn.addEventListener('click', () => {
+        const isLit = candle.classList.contains('lit');
+        if(isLit){
+          clearTimer();
+        }else{
+          startTimer(60*1000);
+          setCount(getCount()+1);
+          elCount.textContent = getCount();
+          localStorage.setItem(LS_KEYS.LIT, '1');
+        }
+      });
+
+      resetCount.addEventListener('click', () => {
+        const ok = confirm('Zerar o contador local? (Isto não apaga a vela)');
+        if(ok){ setCount(0); elCount.textContent = '0'; }
+      });
+
+      function restore(){
+        elCount.textContent = getCount();
+        const until = parseInt(localStorage.getItem(LS_KEYS.UNTIL) || '0', 10);
+        if(until > Date.now()){
+          setLitState(true);
+        } else {
+          setLitState(false);
+        }
+        tick();
+      }
+      restore();
+    })();
+  </script>
+</body>
+</html>
